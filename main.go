@@ -37,10 +37,7 @@ var db *gorm.DB
 var err error
 
 func main() {
-	envVars := InitializeEnvVars()
-	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s port=%s",
-		envVars.host, envVars.user, envVars.dbName, envVars.password, envVars.dbPort)
-	db := ConnectDB(envVars.dialect, dbURI)
+	db := ConnectDB()
 	defer DisconnectDB(db)
 	db.AutoMigrate(&Task{})
 	router := RouteHandler()
@@ -48,8 +45,11 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8081", handler))
 }
 
-func ConnectDB(dialect string, dbURI string) *gorm.DB {
-	db, err = gorm.Open(dialect, dbURI)
+func ConnectDB() *gorm.DB {
+	envVars := InitializeEnvVars()
+	dbURI := fmt.Sprintf("host=%s user=%s dbname=%s sslmode=disable password=%s port=%s",
+		envVars.host, envVars.user, envVars.dbName, envVars.password, envVars.dbPort)
+	db, err = gorm.Open(envVars.dialect, dbURI)
 	if err != nil {
 		log.Fatal(err)
 	} else {
